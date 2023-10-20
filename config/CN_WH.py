@@ -31,7 +31,6 @@ reference_date = 'auto'
 
 
 # account and password of ASF data center
-# For most cities, two accounts are needed, each submitting 250jobs
 ASFUsr = 'SBAS_CN'
 ASFPwd = 'XXXX'
 
