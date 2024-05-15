@@ -81,8 +81,8 @@ def clipByOverlap(inputPath, outputPath):
 
 def clipByMask(inputPath, outputPath, shapeName):
     files = []
-    # postfixList = ["*unw_phase.tif", "*corr.tif", "*dem.tif", "*inc_map_ell.tif"]
-    postfixList = ["*dem.tif", "*inc_map_ell.tif"]
+    postfixList = ["*unw_phase.tif", "*corr.tif", "*dem.tif", "*inc_map_ell.tif","*lv_phi.tif","*lv_theta.tif"]
+    # postfixList = ["*dem.tif", "*inc_map_ell.tif"]
     for dir, _, _ in os.walk(inputPath):
         for postfix in postfixList:
             files.extend(glob.glob(os.path.join(dir, postfix)))
@@ -138,7 +138,7 @@ mintpy.load.unwFile          = {clipPath}/S1*/*unw_phase_clip.tif
 mintpy.load.corFile          = {clipPath}/S1*/*corr_clip.tif
 ##---------geometry datasets:
 mintpy.load.demFile          = {clipPath}/S1*/*dem_clip.tif
-mintpy.load.incAngleFile     = {clipPath}/S1*/*inc_map_clip.tif  
+mintpy.load.incAngleFile     = {clipPath}/S1*/*lv_theta_clip.tif  
 #mintpy.load.waterMaskFile  = {clipPath}/S1*/*watermask.tif
     '''
     with open(configName, "w") as fid:
