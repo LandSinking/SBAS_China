@@ -79,6 +79,7 @@ if opt.submit:  # sumbit jobs to ASF
                           name=jobName,
                           looks='10x2',
                           include_dem=True,
+                          include_look_vectors=True,
                           include_inc_map=True)
 
     # The other pairs exclude dem and inc_map to save storage
