@@ -1,6 +1,7 @@
 import argparse
 import shutil
 import os
+import time
 import sys
 import zipfile
 import importlib
@@ -13,7 +14,7 @@ from subprocess import run
 # load2hdf5.py waterMask.rdr --dtype bool --dname mask -o waterMask.h5
 parser = argparse.ArgumentParser(description='Acquire some parameters for fusion restore')
 parser.add_argument('-c', '--config', required=True, help='path to config file (*.py)')
-parser.add_argument('-l', '--lulcpath', default="",help='path to ESRI LULC files (*0101.tif)')
+parser.add_argument('-l', '--lulcpath', default="",help='path to LULC files (*0101.tif)')
 parser.add_argument('-r', '--restart', action='store_true', help='clear workplace and restart job')
 parser.add_argument('-b', '--backup', action='store_true', help='clear workplace and use backup')
 opt = parser.parse_args()
@@ -110,7 +111,7 @@ os.chdir(workPath)
 
 if not opt.backup:
     # smallbaselineApp.main([str(cfgData), '--dostep', 'load_data'])
-    run(f'smallbaselineApp.py {str(cfgData)} --dostep load_data', shell=True)
+    run(f'smallbaselineApp.py {str(cfgProc)} --dostep load_data', shell=True)
     if not opt.lulcpath=="": # create watermask.h5
         lulcFiles = list(Path(opt.lulcpath).glob('*0101.tif'))        
         geometryFile=workPath / 'inputs'/'geometryGeo.h5'
@@ -136,8 +137,9 @@ else:
 
 # smallbaselineApp.main([str(cfgProc), '--start', 'correct_troposphere'])
 run(f'smallbaselineApp.py {str(cfgProc)} --start correct_troposphere', shell=True)
+print(f'\033[1;32;40mEnd of processing at {time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())}\033[0m')
 # view SBAS result
 # view.main([f'{workPath}/velocity.h5'])
 # tsview.main([f'{workPath}/timeseries.h5'])
 
-
+# save_gdal.py
