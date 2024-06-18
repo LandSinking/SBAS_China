@@ -40,6 +40,7 @@ def createUTMshp(minLat, maxLat, minLon, maxLon, shapeName):
     midLat=(minLat+maxLat)/2
     utm_zone=int(midLon//6)+31
     epsg_code=utm_zone + 32600 + (midLat<0)*100    
+    
     trans=Transformer.from_crs(CRS.from_epsg(4326),CRS.from_epsg(epsg_code))
     lonArray=[minLon,maxLon,maxLon,minLon]
     latArray=[minLat,minLat,maxLat,maxLat]
@@ -63,7 +64,8 @@ def createUTMshp(minLat, maxLat, minLon, maxLon, shapeName):
 
 def clipByOverlap(inputPath, outputPath):
     files = []
-    postfixList = ["*unw_phase.tif", "*corr.tif", "*dem.tif", "*inc_map_ell.tif"]
+    postfixList = ["*unw_phase.tif", "*corr.tif", "*inc_map_ell.tif","*dem.tif", "*lv_phi.tif","*lv_theta.tif"]
+    # postfixList = ["*inc_map_ell.tif","*dem.tif"]
     for dir, _, _ in os.walk(inputPath):
         for postfix in postfixList:
             files.extend(glob.glob(os.path.join(dir, postfix)))
@@ -81,17 +83,18 @@ def clipByOverlap(inputPath, outputPath):
 
 def clipByMask(inputPath, outputPath, shapeName):
     files = []
-    postfixList = ["*unw_phase.tif", "*corr.tif", "*dem.tif", "*inc_map_ell.tif","*lv_phi.tif","*lv_theta.tif"]
-    # postfixList = ["*dem.tif", "*inc_map_ell.tif"]
+    postfixList = ["*unw_phase.tif", "*corr.tif", "*dem.tif", "*lv_phi.tif","*lv_theta.tif", "*inc_map*.tif"]
+    # postfixList = ["*dem.tif", "*lv_phi.tif","*lv_theta.tif"]
+    
     for dir, _, _ in os.walk(inputPath):
         for postfix in postfixList:
             files.extend(glob.glob(os.path.join(dir, postfix)))
     demfile = []
     for filename in files:
         if filename.endswith('dem.tif'):
-            demfile = filename
+            demfile = filename            
             break
-
+    
     filehandle = gdal.Open(demfile)
     trans = filehandle.GetGeoTransform()  # t1
 
@@ -124,29 +127,27 @@ def clipByMask(inputPath, outputPath, shapeName):
 
 
 def copyMetadata(inputPath, outputPath):
-    for currPath in inputPath.glob('S1??_20*_VVP???_INT40_G_ueF_????'):
+    #for currPath in inputPath.glob('S1??_20*_VV????_INT40_G_ueF_????'):
+    for currPath in inputPath.glob('S1*_VV_INT*'):
         source = inputPath / f'{currPath.name}' / f'{currPath.name}.txt'
         target = outputPath / f'{currPath.name}' / f'{currPath.name}.txt'
         copyfile(source, target)
 
 
-def creatConfigLoaddata(clipPath, configName):
-    CONFIG_TXT = f'''
-mintpy.load.processor        = hyp3
-##---------interferogram datasets:
-mintpy.load.unwFile          = {clipPath}/S1*/*unw_phase_clip.tif
-mintpy.load.corFile          = {clipPath}/S1*/*corr_clip.tif
-##---------geometry datasets:
-mintpy.load.demFile          = {clipPath}/S1*/*dem_clip.tif
-mintpy.load.incAngleFile     = {clipPath}/S1*/*lv_theta_clip.tif  
-#mintpy.load.waterMaskFile  = {clipPath}/S1*/*watermask.tif
-    '''
-    with open(configName, "w") as fid:
-        fid.write(CONFIG_TXT)
-
 
 def creatConfigProcess(configName, ref_yx, exclude_date, refer_date):
     CONFIG_TXT = f'''
+mintpy.compute.cluster      = local
+mintpy.load.processor          = hyp3
+##---------interferogram datasets:
+mintpy.load.unwFile          = {clipPath}/S1*/*unw_phase_clip.tif
+mintpy.load.corFile          = {clipPath}/S1*/*corr_clip.tif
+#mintpy.load.connCompFile     = {clipPath}/S1*/*_conncomp_clip.tif
+##---------geometry datasets:
+mintpy.load.demFile          = {clipPath}/S1*/*dem_clip.tif
+mintpy.load.incAngleFile     = {clipPath}/S1*/*lv_theta_clip.tif
+mintpy.load.azAngleFile      = {clipPath}/S1*/*lv_phi_clip.tif
+#mintpy.load.waterMaskFile  = {clipPath}/S1*/*water_mask_clip.tif
 ########## 2. modify_network
 mintpy.network.coherenceBased  = auto  #[yes / no], auto for no, exclude interferograms with coherence < minCoherence
 mintpy.network.minCoherence    = auto  #[0.0-1.0], auto for 0.7
@@ -242,10 +243,10 @@ if __name__ == '__main__':
         print('\033[1;32;40mUnzip files... \033[0m')
         df = pd.read_csv(fnFinalPairs)
         masterList, slaveList = df['Reference'].values, df['Secondary'].values
-        for i in range(masterList.shape[0]):
+        for i in trange(masterList.shape[0]):
             prefix = f'S1{masterList[i][2]}{slaveList[i][2]}'
             T1,T2= masterList[i][17:32], slaveList[i][17:32]
-            strfmt = f'{prefix}_{T1}_{T2}_VVP???_INT40_G_ueF_????.zip'               
+            strfmt = f'{prefix}_{T1}_{T2}_VV????_INT40_G_ueF_????.zip'               
             S1AAFiles = list(savepath.glob(strfmt))
             if len(S1AAFiles) == 0:
                 print('Warning: cannot find ', strfmt)
@@ -261,14 +262,14 @@ if __name__ == '__main__':
             createUTMshp(minLat, maxLat, minLon, maxLon, shpFile)
             clipByMask(unzipPath, clipPath, shpFile)
             print('\033[1;32;40mClip done!\033[0m')
-            copyMetadata(unzipPath, clipPath)
+            
         else:
             print('\033[1;32;40mInvaild Lat/Lon range !\033[0m')            
         
     # Copy metadata files from unzipPath to clipPath
-    
+    copyMetadata(unzipPath, clipPath)
     # creatE CONFIG file
-    print(f'\033[1;32;40mCreate config file: {cfgData} \033[0m')
-    creatConfigLoaddata(clipPath, cfgData)
+    # print(f'\033[1;32;40mCreate config file: {cfgData} \033[0m')
+    # creatConfigLoaddata(clipPath, cfgData)
     print(f'\033[1;32;40mCreate config file: {cfgProc} \033[0m')
     creatConfigProcess(cfgProc, ref_yx, exclude_date, refer_date)
