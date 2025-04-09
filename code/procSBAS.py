@@ -11,15 +11,15 @@ import load2hdf5
 from extractLULC import clipByMask
 import osgeo_utils.gdal_calc as gc
 from subprocess import run
+
+
 # load2hdf5.py waterMask.rdr --dtype bool --dname mask -o waterMask.h5
 parser = argparse.ArgumentParser(description='Acquire some parameters for fusion restore')
 parser.add_argument('-c', '--config', required=True, help='path to config file (*.py)')
-parser.add_argument('-l', '--lulcpath', default="",help='path to LULC files (*0101.tif)')
 parser.add_argument('-r', '--restart', action='store_true', help='clear workplace and restart job')
 parser.add_argument('-b', '--backup', action='store_true', help='clear workplace and use backup')
 opt = parser.parse_args()
 print(opt)
-
 
 configFile = Path(opt.config)
 sys.path.append(str(configFile.parent))
@@ -108,24 +108,9 @@ if opt.restart:
 
 os.chdir(workPath)
 
-
-if not opt.backup:
-    # smallbaselineApp.main([str(cfgData), '--dostep', 'load_data'])
+if not opt.backup:    
+    print(str(cfgProc))
     run(f'smallbaselineApp.py {str(cfgProc)} --dostep load_data', shell=True)
-    if not opt.lulcpath=="": # create watermask.h5
-        lulcFiles = list(Path(opt.lulcpath).glob('*0101.tif'))        
-        geometryFile=workPath / 'inputs'/'geometryGeo.h5'
-        lulcTiFF =str(configFile).replace('.py', '_lulc.tif')
-        watermaskTiFF = str(configFile).replace('.py', '.tif')  
-        if  Path(lulcTiFF).exists():
-            Path(lulcTiFF).unlink()
-        if  Path( watermaskTiFF).exists():
-            Path( watermaskTiFF).unlink()
-        watermaskH5 = workPath /'waterMask.h5'
-        clipByMask(lulcFiles,geometryFile, lulcTiFF)   
-        # gdal_calc.py -A input.tif --outfile=result.tif --calc="A*(A>0)" --NoDataValue=0
-        # gc.main(['--quiet','-a',lulcTiFF, '--outfile',watermaskTiFF,'--calc', "a>1"])
-        # load2hdf5.main([watermaskTiFF, '--dtype', 'byte', '--dname', 'mask', '-o', 'waterMask.h5','--force'])
     # smallbaselineApp.main([str(cfgProc), '--start', 'modify_network', '--stop', 'correct_SET'])
     run(f'smallbaselineApp.py {str(cfgProc)} --start modify_network --stop correct_SET', shell=True)
     zip_correct_SET_files(workPath)
@@ -142,4 +127,6 @@ print(f'\033[1;32;40mEnd of processing at {time.strftime("%Y-%m-%d %H:%M:%S",tim
 # view.main([f'{workPath}/velocity.h5'])
 # tsview.main([f'{workPath}/timeseries.h5'])
 
-# save_gdal.py
+
+
+
