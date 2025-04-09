@@ -3,7 +3,7 @@
 
 1. edit the ASFUsr and ASFPwd in config/USA_357_Houston.py, and run procSearchPairs.py to geneate Sentinel-1 stack
 <pre><code>python procSearchPairs.py -c ../config/USA_357_Houston.py</code></pre>
-2. run procMdfPairs.py to filter the image pairs and edit the SBAS network
+2. run procMdfPairs.py to filter the image pairs and edit the SBAS network via a simple GUI
 <pre><code>python procMdfPairs.py -c ../config/USA_357_Houston.py</code></pre>
 3. run procHYP3.py to submit jobs to ASF
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py</code></pre>
