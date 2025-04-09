@@ -7,7 +7,7 @@
 <pre><code>python procMdfPairs.py -c ../config/USA_357_Houston.py</code></pre>
 3. run procHYP3.py to submit jobs to ASF
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py</code></pre>
-4. After the jobs are finished, download the displacement products and save them to folder "S1AAdata/CN_WH"
+4. After the jobs are finished, download the displacement products and save them to folder "S1AAdata/USA_357_Houston.py"
 5. run procPrepData.py to unzip, clip and prepare the datasets
 <pre><code>python procPrepData.py -c ../config/USA_357_Houston.py</code></pre> 
 6. run procSBAS.py to start the MintPy time series analysis
