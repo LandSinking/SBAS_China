@@ -20,6 +20,8 @@ parser.add_argument('-nc', '--noclip', action='store_true', help='disable data c
 parser.add_argument('-s', '--shapefile', default="", help='specific shapefile for clipping (*.shp)')
 parser.add_argument('-c', '--config', required=True, help='path to config file (*.py)')
 parser.add_argument('-u', '--unzipPath', default="", help='specific unzip path, will override unzipPath in config file')
+parser.add_argument('-w', '--weatherDir', default="D:/", help='path to store weather dir and data(e.g. weatherDir/ERA5/*.grb)')
+
 opt = parser.parse_args()
 
 
@@ -39,14 +41,15 @@ def createUTMshp(minLat, maxLat, minLon, maxLon, shapeName):
     midLon=(minLon+maxLon)/2
     midLat=(minLat+maxLat)/2
     utm_zone=int(midLon//6)+31
-    epsg_code=utm_zone + 32600 + (midLat<0)*100    
+    epsg_code=utm_zone + 32600 + (midLat<0)*100
     
     trans=Transformer.from_crs(CRS.from_epsg(4326),CRS.from_epsg(epsg_code))
     lonArray=[minLon,maxLon,maxLon,minLon]
-    latArray=[minLat,minLat,maxLat,maxLat]
-    xyCoords=trans.transform(latArray,lonArray)
+    latArray=[minLat,minLat,maxLat,maxLat]    
+    xyCoords=trans.transform(latArray,lonArray)    
     minX,maxX=floor(min(xyCoords[0])),ceil(max(xyCoords[0]))
     minY,maxY=floor(min(xyCoords[1])),ceil(max(xyCoords[1]))
+    
     polygon = 'POLYGON((%f %f,%f %f,%f %f,%f %f,%f %f))' % (minX, minY, maxX, minY, maxX,maxY, minX, maxY,minX, minY)
     
     driver = ogr.GetDriverByName("ESRI Shapefile")
@@ -61,6 +64,7 @@ def createUTMshp(minLat, maxLat, minLon, maxLon, shapeName):
     feature.SetField("ID", '0')
     feature.SetGeometry(ogr.CreateGeometryFromWkt(polygon))
     layer.CreateFeature(feature)
+    return 
 
 def clipByOverlap(inputPath, outputPath):
     files = []
@@ -81,45 +85,67 @@ def clipByOverlap(inputPath, outputPath):
         outfile = outfile.replace(str(inputPath), str(outputPath))
         gdal.Translate(destName=outfile, srcDS=fname, projWin=[ulx, uly, lrx, lry])
 
-def clipByMask(inputPath, outputPath, shapeName):
-    files = []
-    postfixList = ["*unw_phase.tif", "*corr.tif", "*dem.tif", "*lv_phi.tif","*lv_theta.tif", "*inc_map*.tif"]
-    # postfixList = ["*dem.tif", "*lv_phi.tif","*lv_theta.tif"]
+def clipByMask(inputPath, outputPath, minLat, maxLat, minLon, maxLon, snapToDEM=False):
+    files = []   
+    postfixList = ["unw_phase.tif", "corr.tif" , "dem.tif", "lv_phi.tif","lv_theta.tif"]
     
-    for dir, _, _ in os.walk(inputPath):
+    images=list(inputPath.glob('S1*_VV*_INT*/*.tif'))    
+    for currImage in images:
+        filename=str(currImage)
         for postfix in postfixList:
-            files.extend(glob.glob(os.path.join(dir, postfix)))
-    demfile = []
-    for filename in files:
+            if filename.endswith(postfix):
+                files.append(filename)
         if filename.endswith('dem.tif'):
-            demfile = filename            
-            break
+            demfile = filename        
     
     filehandle = gdal.Open(demfile)
-    trans = filehandle.GetGeoTransform()  # t1
-
-    # sometimes the DEM projection is not the same as AOI projection,
-    # which might lead to inconsistent image size for two parts of a city
-    # AOI projection is perferable.
-
-    prjFile=shapeName.with_suffix('.prj')    
-    dstProj=str(prjFile) if prjFile.exists() else filehandle.GetProjection()
-    print('Destination projection:',dstProj) 
+    GT=filehandle.GetGeoTransform()
+    demRes = abs(GT[1])
+    demX,demY=GT[0],GT[3]    
+    if snapToDEM: 
+        # snap to the DEM grid, so that all output files have the same projection as the DEM.
+        # default is False, because sometimes projections of DEM and AOI are different, e.g. UTM_51N and UTM_50N, respectively. 
+        dstProj=filehandle.GetProjection()
+        trans=Transformer.from_crs(CRS.from_epsg(4326),CRS.from_wkt(dstProj))
+        lonArray=[minLon,maxLon,maxLon,minLon]
+        latArray=[minLat,minLat,maxLat,maxLat]    
+        xyCoords=trans.transform(latArray,lonArray)    
+        minX=floor((min(xyCoords[0])-demX)/demRes)*demRes+demX
+        maxX=ceil((max(xyCoords[0])-demX)/demRes)*demRes+demX
+        minY=floor((min(xyCoords[1])-demY)/demRes)*demRes+demY
+        maxY=ceil((max(xyCoords[1])-demY)/demRes)*demRes+demY
+    else: 
+        # use the center of AOI to determine output projection if snapToDEM is False
+        midLon=(minLon+maxLon)/2
+        midLat=(minLat+maxLat)/2
+        utm_zone=int(midLon//6)+31
+        epsg_code=utm_zone + 32600 + (midLat<0)*100
+        dstProj=CRS.from_epsg(epsg_code)
+        trans=Transformer.from_crs(CRS.from_epsg(4326),CRS.from_epsg(epsg_code))
+        lonArray=[minLon,maxLon,maxLon,minLon]
+        latArray=[minLat,minLat,maxLat,maxLat]    
+        xyCoords=trans.transform(latArray,lonArray)    
+        minX,maxX=floor(min(xyCoords[0])),ceil(max(xyCoords[0]))
+        minY,maxY=floor(min(xyCoords[1])),ceil(max(xyCoords[1]))
+    bounds=(minX, minY, maxX, maxY)
+    print("outbounds:",dstProj,bounds)
     # print(demfile, trans)
-
+    
     outfiles = []
-    for i in trange(len(files)):
-        # for i in trange(0):
+    for i in trange(len(files)):         
         outfile = files[i].replace(".tif", "_clip.tif")
-        outfile = outfile.replace(str(inputPath), str(outputPath))
+        outfile = outfile.replace(str(inputPath), str(outputPath))        
+        if Path(outfile).exists():            
+            continue
         creatDir(Path(outfile).parent)
         gdal.Warp(outfile,
                   files[i],
-                  format='GTiff',
-                  cutlineDSName=str(shapeName),                  
+                  format='GTiff',                  
+                  outputBounds=bounds,# (minX, minY, maxX, maxY)
                   dstSRS=dstProj,
-                  xRes=abs(trans[1]),
-                  yRes=abs(trans[5]),
+                  #resampleAlg='bilinear',
+                  xRes=demRes,
+                  yRes=demRes,
                   cropToCutline=True,
                   dstNodata=0)
         outfiles.append(outfile)
@@ -128,26 +154,37 @@ def clipByMask(inputPath, outputPath, shapeName):
 
 def copyMetadata(inputPath, outputPath):
     #for currPath in inputPath.glob('S1??_20*_VV????_INT40_G_ueF_????'):
-    for currPath in inputPath.glob('S1*_VV_INT*'):
+    print('\033[1;32;40mcopy Metadata...\033[0m')    
+    for currPath in inputPath.glob('S1*_VV*_INT*'):
         source = inputPath / f'{currPath.name}' / f'{currPath.name}.txt'
-        target = outputPath / f'{currPath.name}' / f'{currPath.name}.txt'
+        target = outputPath / f'{currPath.name}' / f'{currPath.name}.txt'        
         copyfile(source, target)
 
 
 
-def creatConfigProcess(configName, ref_yx, exclude_date, refer_date):
+def creatConfigProcess(configName, ref_yx, exclude_date, refer_date,weatherDir):
     CONFIG_TXT = f'''
-mintpy.compute.cluster      = local
+
 mintpy.load.processor          = hyp3
+mintpy.compute.maxMemory = 16 #[float > 0.0], auto for 4, max memory to allocate in GB
+
+## parallel processing with dask
+## currently apply to steps: invert_network, correct_topography
+## cluster   = none to turn off the parallel computing
+## numWorker = all  to use all of locally available cores (for cluster = local only)
+## numWorker = 80%  to use 80% of locally available cores (for cluster = local only)
+## config    = none to rollback to the default name (same as the cluster type; for cluster != local)
+mintpy.compute.cluster   = local #[local / slurm / pbs / lsf / none], auto for none, cluster type
+mintpy.compute.numWorker = 40% #[int > 1 / all / num%], auto for 4 (local) or 40 (slurm / pbs / lsf), num of workers
+mintpy.compute.config    = auto #[none / slurm / pbs / lsf ], auto for none (same as cluster), config name
+
 ##---------interferogram datasets:
 mintpy.load.unwFile          = {clipPath}/S1*/*unw_phase_clip.tif
 mintpy.load.corFile          = {clipPath}/S1*/*corr_clip.tif
-#mintpy.load.connCompFile     = {clipPath}/S1*/*_conncomp_clip.tif
 ##---------geometry datasets:
 mintpy.load.demFile          = {clipPath}/S1*/*dem_clip.tif
 mintpy.load.incAngleFile     = {clipPath}/S1*/*lv_theta_clip.tif
 mintpy.load.azAngleFile      = {clipPath}/S1*/*lv_phi_clip.tif
-#mintpy.load.waterMaskFile  = {clipPath}/S1*/*water_mask_clip.tif
 ########## 2. modify_network
 mintpy.network.coherenceBased  = auto  #[yes / no], auto for no, exclude interferograms with coherence < minCoherence
 mintpy.network.minCoherence    = auto  #[0.0-1.0], auto for 0.7
@@ -181,7 +218,14 @@ mintpy.networkInversion.waterMaskFile   = auto #[filename / no], auto for waterM
 ## c. no               - no masking [recommended].
 ## d. offsetSNR        - mask out pixels with offset SNR < maskThreshold [for offset]
 mintpy.networkInversion.maskDataset   = coherence #[coherence / connectComponent / offsetSNR / no], auto for no
-mintpy.networkInversion.maskThreshold = 0.3 #[0-inf], auto for 0.4
+mintpy.networkInversion.maskThreshold = 0.35 #[0-inf], auto for 0.4
+
+
+########## 9. deramp (optional)
+## Estimate and remove a phase ramp for each acquisition based on the reliable pixels.
+## Recommended for localized deformation signals, i.e. volcanic deformation, landslide and land subsidence, etc.
+## NOT recommended for long spatial wavelength deformation signals, i.e. co-, post- and inter-seimic deformation.
+mintpy.deramp          = linear  #[no / linear / quadratic], auto for no - no ramp will be removed
 
 ########## 9.2 reference_date
 ## Reference all time-series to one date in time
@@ -246,7 +290,7 @@ if __name__ == '__main__':
         for i in trange(masterList.shape[0]):
             prefix = f'S1{masterList[i][2]}{slaveList[i][2]}'
             T1,T2= masterList[i][17:32], slaveList[i][17:32]
-            strfmt = f'{prefix}_{T1}_{T2}_VV????_INT40_G_ueF_????.zip'               
+            strfmt = f'{prefix}_{T1}_{T2}_VV????_INT40_?_???_????.zip'
             S1AAFiles = list(savepath.glob(strfmt))
             if len(S1AAFiles) == 0:
                 print('Warning: cannot find ', strfmt)
@@ -260,7 +304,7 @@ if __name__ == '__main__':
         if all([minLat, maxLat, minLon, maxLon]):
             print('\033[1;32;40mClip images by userdifined mask....\033[0m')
             createUTMshp(minLat, maxLat, minLon, maxLon, shpFile)
-            clipByMask(unzipPath, clipPath, shpFile)
+            clipByMask(unzipPath, clipPath, minLat, maxLat, minLon, maxLon,snapToDEM=False)
             print('\033[1;32;40mClip done!\033[0m')
             
         else:
@@ -272,4 +316,4 @@ if __name__ == '__main__':
     # print(f'\033[1;32;40mCreate config file: {cfgData} \033[0m')
     # creatConfigLoaddata(clipPath, cfgData)
     print(f'\033[1;32;40mCreate config file: {cfgProc} \033[0m')
-    creatConfigProcess(cfgProc, ref_yx, exclude_date, refer_date)
+    creatConfigProcess(cfgProc, ref_yx, exclude_date, refer_date,weatherDir=opt.weatherDir)
