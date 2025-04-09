@@ -30,7 +30,7 @@ reference_date = 'auto'
 # account and password of ASF data center
 # accounts of ASFUsr_search are only used for downloading succeed jobs, 
 # accounts of ASFUsr_submit are used for submitting jobs and downloading succeed jobs
-# all accounts should use the same password
+# all accounts should use the same password, as defined in ASFPwd
 
 ASFUsr_search = []
 ASFUsr_submit = ['username1','username2'] 
