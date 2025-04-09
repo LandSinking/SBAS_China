@@ -86,8 +86,11 @@ def clipByOverlap(inputPath, outputPath):
         gdal.Translate(destName=outfile, srcDS=fname, projWin=[ulx, uly, lrx, lry])
 
 def clipByMask(inputPath, outputPath, minLat, maxLat, minLon, maxLon, snapToDEM=False):
-    files = []   
+    files = []
+    #20241004# postfixList = ["*unw_phase_clip.tif", "*corr_clip.tif" , "*dem_clip.tif", "*lv_phi_clip.tif","*lv_theta_clip.tif"]
     postfixList = ["unw_phase.tif", "corr.tif" , "dem.tif", "lv_phi.tif","lv_theta.tif"]
+    # postfixList = ["*unw_phase.tif", "*corr.tif"]
+    # postfixList = ["*dem.tif", "*lv_phi.tif","*lv_theta.tif"]    
     
     images=list(inputPath.glob('S1*_VV*_INT*/*.tif'))    
     for currImage in images:
@@ -181,10 +184,12 @@ mintpy.compute.config    = auto #[none / slurm / pbs / lsf ], auto for none (sam
 ##---------interferogram datasets:
 mintpy.load.unwFile          = {clipPath}/S1*/*unw_phase_clip.tif
 mintpy.load.corFile          = {clipPath}/S1*/*corr_clip.tif
+
 ##---------geometry datasets:
 mintpy.load.demFile          = {clipPath}/S1*/*dem_clip.tif
 mintpy.load.incAngleFile     = {clipPath}/S1*/*lv_theta_clip.tif
 mintpy.load.azAngleFile      = {clipPath}/S1*/*lv_phi_clip.tif
+
 ########## 2. modify_network
 mintpy.network.coherenceBased  = auto  #[yes / no], auto for no, exclude interferograms with coherence < minCoherence
 mintpy.network.minCoherence    = auto  #[0.0-1.0], auto for 0.7
@@ -220,6 +225,8 @@ mintpy.networkInversion.waterMaskFile   = auto #[filename / no], auto for waterM
 mintpy.networkInversion.maskDataset   = coherence #[coherence / connectComponent / offsetSNR / no], auto for no
 mintpy.networkInversion.maskThreshold = 0.35 #[0-inf], auto for 0.4
 
+########## 6. correct_troposphere (optional but recommended)
+mintpy.troposphericDelay.weatherDir   = {weatherDir}  #[path2directory], auto for WEATHER_DIR or "./"
 
 ########## 9. deramp (optional)
 ## Estimate and remove a phase ramp for each acquisition based on the reliable pixels.
@@ -258,8 +265,7 @@ if __name__ == '__main__':
     minLon, maxLon = setting.minLon, setting.maxLon
     shpFile = Path(opt.shapefile) if (len(opt.shapefile)!=0) else setting.shpFile
     cfgData, cfgProc = setting.cfgData, setting.cfgProc
-    fnFinalPairs = setting.fnFinalPairs
-    # minCoherence = setting.minCoherence
+    fnFinalPairs = setting.fnFinalPairs    
     ref_yx = setting.reference_yx
     '''
     try:
@@ -311,9 +317,6 @@ if __name__ == '__main__':
             print('\033[1;32;40mInvaild Lat/Lon range !\033[0m')            
         
     # Copy metadata files from unzipPath to clipPath
-    copyMetadata(unzipPath, clipPath)
-    # creatE CONFIG file
-    # print(f'\033[1;32;40mCreate config file: {cfgData} \033[0m')
-    # creatConfigLoaddata(clipPath, cfgData)
+    copyMetadata(unzipPath, clipPath)   
     print(f'\033[1;32;40mCreate config file: {cfgProc} \033[0m')
     creatConfigProcess(cfgProc, ref_yx, exclude_date, refer_date,weatherDir=opt.weatherDir)
