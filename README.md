@@ -1,4 +1,4 @@
-# SBAS_China: steps for MintPy time series analysis
+# SBAS_China: steps for InSAR time series analysis
 # 
 
 1. edit the ASFUsr and ASFPwd in config/USA_357_Houston.py, and run procSearchPairs.py to geneate Sentinel-1 stack
