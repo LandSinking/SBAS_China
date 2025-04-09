@@ -15,9 +15,6 @@ import asf_search as asf
 from tqdm import tqdm, trange
 import sys
 
-# global variables
-stack_start = parse_date('2014-06-15T00:00:00Z')
-stack_end = parse_date('2023-07-01T00:00:00Z')
 
 # parsing
 parser = argparse.ArgumentParser(description='Acquire some parameters for fusion restore')
@@ -36,6 +33,10 @@ auxRoot =setting.auxRoot
 postfix = setting.postfix
 frame_start=setting.startFrame
 frame_end=setting.endFrame
+datestr="20140101"
+stack_start=parse_date(datestr.replace(datestr[:len(str(setting.startYear))],str(setting.startYear)))
+stack_end=parse_date(datestr.replace(datestr[:len(str(setting.endYear))],str(setting.endYear)))
+
 
 # call ASF API to search for products
 granules=asf.granule_search(baseImage)
