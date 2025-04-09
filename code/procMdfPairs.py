@@ -263,12 +263,12 @@ ax.xaxis.set_minor_locator(mdt.MonthLocator())
 ax.tick_params(axis='both', direction='out', labelsize=10)
 
 for i in range(dates.shape[0]):
-    ax.plot_date(dates[i], baseline[i], c='green')  # , picker=point_picker
+    ax.plot(dates[i], baseline[i], c='green')  # , picker=point_picker
 
 for currPair in totalPairs:
     x0, y0 = dates[currPair[0]], baseline[currPair[0]]
     x1, y1 = dates[currPair[1]], baseline[currPair[1]]
-    ax.plot_date((x0, x1), (y0, y1), 'deepskyblue', picker=True)
+    ax.plot((x0, x1), (y0, y1), 'deepskyblue', picker=True)
 fig.autofmt_xdate()
 
 btnAdd = plt.Button(plt.axes([0.125, 0.9, 0.1, 0.06]), 'Add pairs', hovercolor='y')
