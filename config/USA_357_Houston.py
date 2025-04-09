@@ -21,8 +21,10 @@ maxLat = 30.1953
 minLon = -96.1257
 maxLon = -94.6618
 # POLYGON((-96.1257 29.1038,-94.6618 29.1038,-94.6618 30.1953,-96.1257 30.1953,-96.1257 29.1038))
+
 # reference_yx and reference_date has a large influence on the sbas results
-reference_yx = '1416,2104' #-95.2741, 29.7017
+# better to identify reference_yx with the aid of GNSS observations
+reference_yx = 'auto'
 reference_date = 'auto'
 
 # account and password of ASF data center
@@ -31,7 +33,7 @@ reference_date = 'auto'
 
 
 ASFUsr_search = []
-ASFUsr_submit = ['username']
+ASFUsr_submit = ['username1','username2'] # two accounts use the same password
 ASFPwd = 'password'
 
 #===================== do not need modification=============================
@@ -50,7 +52,6 @@ fnFinalPairs = auxRoot / f'{postfix}_final_pairs.csv'
 figPairs = auxRoot / f'{postfix}_final_pairs.png'
 
 # Max allowed length of jobName is 20 chars, otherwise it will caused an requests.exceptions.HTTPError
-# ruler # '12345678901234567890'
 jobName = f'WLD_{postfix}'
 if len(jobName) > 20:
     print('\033[1;31;40mError: length of jobName must be less than 20! \033[0m')
