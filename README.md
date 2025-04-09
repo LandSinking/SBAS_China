@@ -12,4 +12,4 @@
 <pre><code>python procPrepData.py -c ../config/USA_357_Houston.py</code></pre> 
 6. run procSBAS.py to start the MintPy time series analysis
 <pre><code>python procSBAS.py -c ../config/USA_357_Houston.py</code></pre> 
-7. the results file can be found in folder "./workplace_USA_357_Houston/Mintpy"
+7. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
