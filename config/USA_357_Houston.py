@@ -9,7 +9,7 @@ endYear = 202307
 
 # range of frame: [startFrame,endFrame)
 # if we need frames 94,95,96, then startFrame=94,endFrame=97
-# S1A_IW_SLC__1SDV_20230213T100447_20230213T100514_047216_05AA62_0F98
+# baseImage was used for searching sbas stacks.
 baseImage='S1A_IW_SLC__1SDV_20241022T122322_20241022T122351_056215_06E1C1_3243'
 startFrame = 492
 endFrame = 494
