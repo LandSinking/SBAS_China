@@ -7,7 +7,7 @@
 <pre><code>python procMdfPairs.py -c ../config/USA_357_Houston.py</code></pre>
 3. run procHYP3.py with "-s" option to submit jobs to ASF . Details for available options can be found in the source code.
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py -s</code></pre>
-4. After the jobs are finished, run procHYP3.py with "-s" option to get the links for downloading the displacement products. 
+4. After the jobs are finished, run procHYP3.py with "-d" option to get the links for downloading the displacement products. 
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py -d</code></pre>
 5. Download the displacement products to the folder "S1AAdata/USA_357_Houston", and then run procPrepData.py to unzip, clip and prepare the datasets
 <pre><code>python procPrepData.py -c ../config/USA_357_Houston.py</code></pre> 
