@@ -126,21 +126,7 @@ if opt.view:  # view sumbited jobs
     fig.autofmt_xdate()
     plt.show()
     fig.savefig('fig.png', dpi=300, bbox_inches='tight')
-    '''
-    MasterList = np.array(MasterList)
-    SlaveList = np.array(SlaveList)
-    temp=np.zeros_like(MasterList,dtype=np.int8)
-    outputDF = pd.DataFrame({
-        'Reference': MasterList,
-        'ABC':temp,
-        'Secondary': SlaveList,
-        'XYZ':temp,
-        'Baseline': temp
-    })
-
-    fnFinalPairs = '_final_pairs.csv'
-    outputDF.to_csv(fnFinalPairs, index=False)
-    '''
+  
 if opt.submit:  # sumbit jobs to ASF    
     insarJobs = Batch()    
     downList = []
