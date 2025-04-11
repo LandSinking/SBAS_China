@@ -7,13 +7,12 @@ import zipfile
 import importlib
 from pathlib import Path
 from mintpy import view, tsview, smallbaselineApp
-import load2hdf5
 from extractLULC import clipByMask
 import osgeo_utils.gdal_calc as gc
 from subprocess import run
 
 
-# load2hdf5.py waterMask.rdr --dtype bool --dname mask -o waterMask.h5
+
 parser = argparse.ArgumentParser(description='Acquire some parameters for fusion restore')
 parser.add_argument('-c', '--config', required=True, help='path to config file (*.py)')
 parser.add_argument('-r', '--restart', action='store_true', help='clear workplace and restart job')
