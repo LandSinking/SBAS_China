@@ -17,7 +17,7 @@ from subprocess import run
 parser = argparse.ArgumentParser(description='Acquire some parameters for fusion restore')
 parser.add_argument('-c', '--config', required=True, help='path to config file (*.py)')
 parser.add_argument('-r', '--restart', action='store_true', help='clear workplace and restart job')
-parser.add_argument('-b', '--backup', action='store_true', help='clear workplace and use backup')
+parser.add_argument('-b', '--backup', action='store_true', help='clear files after the step of correct_troposphere and restart the job. Useful to handle errors in accquiring ERA5 data')
 opt = parser.parse_args()
 print(opt)
 
