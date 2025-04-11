@@ -5,7 +5,7 @@
 <pre><code>python procSearchPairs.py -c ../config/USA_357_Houston.py</code></pre>
 2. run procMdfPairs.py to filter the image pairs and edit the SBAS network via a simple GUI
 <pre><code>python procMdfPairs.py -c ../config/USA_357_Houston.py</code></pre>
-3. run procHYP3.py to submit jobs to ASF
+3. run procHYP3.py with "-s" option to submit jobs to ASF . Details for available options can be found in the source code.
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py -s</code></pre>
 4. After the jobs are finished, download the displacement products and save them to folder "S1AAdata/USA_357_Houston"
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py -d</code></pre>
