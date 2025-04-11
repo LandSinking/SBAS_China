@@ -20,7 +20,7 @@ parser.add_argument('-nc', '--noclip', action='store_true', help='disable data c
 parser.add_argument('-s', '--shapefile', default="", help='specific shapefile for clipping (*.shp)')
 parser.add_argument('-c', '--config', required=True, help='path to config file (*.py)')
 parser.add_argument('-u', '--unzipPath', default="", help='specific unzip path, will override unzipPath in config file')
-parser.add_argument('-w', '--weatherDir', default="D:/", help='path to store weather dir and data(e.g. weatherDir/ERA5/*.grb)')
+parser.add_argument('-w', '--weatherDir', default="./", help='path to store weather dir and data(e.g. weatherDir/ERA5/*.grb)')
 
 opt = parser.parse_args()
 
