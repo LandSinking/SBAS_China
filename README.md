@@ -11,6 +11,7 @@
 <pre><code>python procHYP3.py -c ../config/USA_357_Houston.py -d</code></pre>
 5. Download the displacement products to the folder "S1AAdata/USA_357_Houston", and then run procPrepData.py to unzip, clip and prepare the datasets
 <pre><code>python procPrepData.py -c ../config/USA_357_Houston.py</code></pre> 
-6. run procSBAS.py to start the MintPy time series analysis
+6. As advised by the ASF's HyP3 platform — ***Always doubt your interferogram first!*** — users must carefully inspect the quality of each interferogram to ensure the reliability of InSAR-derived results. 
+7. run procSBAS.py to start the MintPy time series analysis
 <pre><code>python procSBAS.py -c ../config/USA_357_Houston.py</code></pre> 
-7. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
+8. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
