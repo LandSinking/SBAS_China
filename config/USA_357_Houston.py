@@ -22,7 +22,7 @@ minLon = -96.1257
 maxLon = -94.6618
 # POLYGON((-96.1257 29.1038,-94.6618 29.1038,-94.6618 30.1953,-96.1257 30.1953,-96.1257 29.1038))
 
-# reference_yx and reference_date has a large influence on the sbas results
+# reference_yx has a large influence on the sbas results
 # better to identify reference_yx with the aid of GNSS observations
 reference_yx = 'auto'
 reference_date = 'auto'
@@ -86,3 +86,4 @@ if not clipPath.exists():
 
 if not mpyPath.exists():
     mpyPath.mkdir()
+
