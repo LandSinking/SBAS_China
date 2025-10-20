@@ -1,8 +1,11 @@
 # SBAS_China: steps for InSAR time series analysis
 # 
 This is an example from Houston that demonstrates SBAS InSAR processing for monitoring global urban subsidence, utilizing ASF's Vertex cloud computing platform and the MintPy package.
+
 The Houston configuration file at `config/USA_357_Houston.py` records key parameters for data preprocessing and InSAR time-series analysis; including the base image, temporal and frame ranges for SBAS stack search; study area extent for image clipping; reference point coordinates and the coherence threshold for MintPy analysis.
-**More information about parameters used in InSAR data processing for 465 global major cities can be found it Table S1 of our manuscript.**
+
+**For more information on the InSAR processing parameters used for 465 global major cities, see Table S1 (Supplementary Materials) of our manuscript.**
+
 1. edit the ASFUsr and ASFPwd in `config/USA_357_Houston.py`, and run `procSearchPairs.py` to geneate Sentinel-1 stack
 <pre><code>python procSearchPairs.py -c ../config/USA_357_Houston.py</code></pre>
 2. run `procMdfPairs.py` to filter the image pairs and edit the SBAS network via a simple GUI
