@@ -165,7 +165,7 @@ def copyMetadata(inputPath, outputPath):
 
 
 
-def creatConfigProcess(configName, ref_yx, exclude_date, refer_date,weatherDir):
+def creatConfigProcess(configName, ref_yx, exclude_date, refer_date, weatherDir, coh_threshold_value):
     CONFIG_TXT = f'''
 
 mintpy.load.processor          = hyp3
@@ -223,7 +223,7 @@ mintpy.networkInversion.waterMaskFile   = auto #[filename / no], auto for waterM
 ## c. no               - no masking [recommended].
 ## d. offsetSNR        - mask out pixels with offset SNR < maskThreshold [for offset]
 mintpy.networkInversion.maskDataset   = coherence #[coherence / connectComponent / offsetSNR / no], auto for no
-mintpy.networkInversion.maskThreshold = 0.35 #[0-inf], auto for 0.4
+mintpy.networkInversion.maskThreshold = {coh_threshold_value} #[0-inf], auto for 0.4
 
 ########## 6. correct_troposphere (optional but recommended)
 mintpy.troposphericDelay.weatherDir   = {weatherDir}  #[path2directory], auto for WEATHER_DIR or "./"
@@ -267,6 +267,7 @@ if __name__ == '__main__':
     cfgData, cfgProc = setting.cfgData, setting.cfgProc
     fnFinalPairs = setting.fnFinalPairs    
     ref_yx = setting.reference_yx
+    coh_threshold=setting.coherence_threshold
     '''
     try:
         exclude_txt = setting.exclude_date
@@ -319,4 +320,5 @@ if __name__ == '__main__':
     # Copy metadata files from unzipPath to clipPath
     copyMetadata(unzipPath, clipPath)   
     print(f'\033[1;32;40mCreate config file: {cfgProc} \033[0m')
-    creatConfigProcess(cfgProc, ref_yx, exclude_date, refer_date,weatherDir=opt.weatherDir)
+    creatConfigProcess(cfgProc, ref_yx, exclude_date, refer_date,weatherDir=opt.weatherDir,coh_threshold_value=coh_threshold)
+
