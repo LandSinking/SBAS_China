@@ -6,7 +6,7 @@ The Houston configuration file at `config/USA_357_Houston.py` records key parame
 
 **For more information on the InSAR processing parameters used for 465 global major cities, see Table S1 (Supplementary Materials) of our manuscript.**
 
-**Our monitoring results are available in [https://ee-pkurelab.projects.earthengine.app/view/gus].**
+**Our monitoring results are available in [https://ee-pkurelab.projects.earthengine.app/view/gus](https://ee-pkurelab.projects.earthengine.app/view/gus).**
 
 1. edit the ASFUsr and ASFPwd in `config/USA_357_Houston.py`, and run `procSearchPairs.py` to geneate Sentinel-1 stack
 <pre><code>python procSearchPairs.py -c ../config/USA_357_Houston.py</code></pre>
