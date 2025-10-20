@@ -26,7 +26,7 @@ maxLon = -94.6618
 # better to identify reference_yx with the aid of GNSS observations
 reference_yx = 'auto'
 reference_date = 'auto'
-
+coherence_threshold = 0.35
 # account and password of ASF data center
 # accounts of ASFUsr_search are only used for downloading succeed jobs, 
 # accounts of ASFUsr_submit are used for submitting jobs and downloading succeed jobs
@@ -86,4 +86,5 @@ if not clipPath.exists():
 
 if not mpyPath.exists():
     mpyPath.mkdir()
+
 
