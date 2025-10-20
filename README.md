@@ -1,6 +1,7 @@
 # SBAS_China: steps for InSAR time series analysis
 # 
-
+This is an example from Houston that demonstrates SBAS InSAR processing for monitoring global urban subsidence, utilizing ASF's Vertex cloud computing platform and the MintPy package.
+The config file
 1. edit the ASFUsr and ASFPwd in config/USA_357_Houston.py, and run procSearchPairs.py to geneate Sentinel-1 stack
 <pre><code>python procSearchPairs.py -c ../config/USA_357_Houston.py</code></pre>
 2. run procMdfPairs.py to filter the image pairs and edit the SBAS network via a simple GUI
@@ -15,6 +16,6 @@
 7. run procSBAS.py to start the MintPy time series analysis
 <pre><code>python procSBAS.py -c ../config/USA_357_Houston.py</code></pre> 
 8. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
-9. Identify a new reference point where the subsiding velocity is close to the mode, typically on a man-made structure, and record its y and x coordinates in the reference_yx variable of the configuration file. Afterwards, run second round of Mintpy analysis with the new reference point:
+9. Identify a new reference point where the subsiding velocity is close to the mode, typically on a man-made structure; and then update the <code>reference_yx<code> variable in the config file with the new reference point's Y, X coordinates in the result file. Afterwards, run second round of Mintpy analysis with the new reference point:
 <pre><code>python procSBAS.py -c ../config/USA_357_Houston.py</code></pre> 
 10. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
