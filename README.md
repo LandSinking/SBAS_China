@@ -16,6 +16,6 @@ The config file
 7. run procSBAS.py to start the MintPy time series analysis
 <pre><code>python procSBAS.py -c ../config/USA_357_Houston.py</code></pre> 
 8. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
-9. Identify a new reference point where the subsiding velocity is close to the mode, typically on a man-made structure; and then update the <code>reference_yx<code> variable in the config file with the new reference point's Y, X coordinates in the result file. Afterwards, run second round of Mintpy analysis with the new reference point:
+9. Identify a new reference point where the subsiding velocity is close to the mode, typically on a man-made structure; and then update the <pre><code>reference_yx</code></pre>  variable in the config file with the new reference point's Y, X coordinates in the result file. Afterwards, run second round of Mintpy analysis with the new reference point:
 <pre><code>python procSBAS.py -c ../config/USA_357_Houston.py</code></pre> 
 10. Result files can be found in folder "./workplace_USA_357_Houston/Mintpy"
